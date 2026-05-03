@@ -39,6 +39,10 @@ kotlin {
 
             // Minggu 7
             implementation("app.cash.sqldelight:android-driver:2.0.1")
+
+            // --- TUGAS 8: Koin untuk Android ---
+            implementation("io.insert-koin:koin-android:3.5.3")
+            implementation("io.insert-koin:koin-androidx-compose:3.5.3")
         }
         commonMain.dependencies {
             implementation(libs.compose.runtime)
@@ -59,7 +63,7 @@ kotlin {
             implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
             implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
 
-            // --- TUGAS 7: SQLDelight Runtime & Multiplatform Settings ---
+            // Minggu 7: SQLDelight Runtime & Multiplatform Settings ---
             implementation("app.cash.sqldelight:runtime:2.0.1")
             implementation("app.cash.sqldelight:coroutines-extensions:2.0.1")
             implementation("com.russhwolf:multiplatform-settings:1.1.1")
@@ -67,6 +71,10 @@ kotlin {
 
             // --- FIX ERROR DATETIME ---
             implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.1")
+
+            // --- TUGAS 8: Koin (Dependency Injection) Core & Compose ---
+            implementation("io.insert-koin:koin-core:3.5.3")
+            implementation("io.insert-koin:koin-compose:1.1.2")
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

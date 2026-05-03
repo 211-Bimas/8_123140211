@@ -22,6 +22,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.example.project.data.ProfileUiState
+import org.koin.compose.koinInject
+import org.example.project.DeviceInfo
+import org.example.project.BatteryInfo // <-- TAMBAHAN IMPORT BONUS BATERAI
 
 // ============================================================
 // WARNA TEMA
@@ -74,7 +77,6 @@ fun ProfileHeader(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            // FITUR BARU: Switch Dark Mode di pojok kanan atas
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End,
@@ -101,7 +103,6 @@ fun ProfileHeader(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Foto profil circular
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
@@ -126,7 +127,6 @@ fun ProfileHeader(
 
             Spacer(modifier = Modifier.height(18.dp))
 
-            // Nama (Dari ViewModel)
             Text(
                 text = name,
                 fontSize = 24.sp,
@@ -137,7 +137,6 @@ fun ProfileHeader(
 
             Spacer(modifier = Modifier.height(6.dp))
 
-            // Title
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(20.dp))
@@ -161,7 +160,6 @@ fun ProfileHeader(
             )
             Spacer(modifier = Modifier.height(14.dp))
 
-            // Bio (Dari ViewModel)
             Text(
                 text = bio,
                 fontSize = 13.sp,
@@ -175,7 +173,7 @@ fun ProfileHeader(
 }
 
 // ============================================================
-// COMPOSABLE 2 & 3: Komponen UI Aslimu
+// COMPOSABLE 2 & 3: Komponen UI Asli
 // ============================================================
 @Composable
 fun StatItem(value: String, label: String, textColor: Color, modifier: Modifier = Modifier) {
@@ -284,10 +282,13 @@ fun ProfileScreen(
     var showEditDialog by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
 
-    // Ambil warna dinamis dari MaterialTheme (Agar Dark Mode berfungsi pada UI lama kamu)
     val bgColor = MaterialTheme.colorScheme.background
     val surfaceColor = MaterialTheme.colorScheme.surface
     val textColor = MaterialTheme.colorScheme.onBackground
+
+    // TUGAS 8: Koin Inject DeviceInfo & BatteryInfo (BONUS)
+    val deviceInfo = koinInject<DeviceInfo>()
+    val batteryInfo = koinInject<BatteryInfo>()
 
     val skills = listOf(
         SkillInfo(Icons.Filled.Code, "Mobile Development", "Kotlin, Compose"),
@@ -310,7 +311,6 @@ fun ProfileScreen(
     Column(
         modifier = Modifier.fillMaxSize().background(bgColor).verticalScroll(scrollState)
     ) {
-        // 1. Header
         ProfileHeader(
             name = uiState.name,
             title = uiState.title,
@@ -319,7 +319,6 @@ fun ProfileScreen(
             onToggleDarkMode = onToggleDarkMode
         )
 
-        // 2. Stat card melayang
         Card(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).offset(y = (-20).dp),
             shape = RoundedCornerShape(16.dp),
@@ -338,7 +337,6 @@ fun ProfileScreen(
             }
         }
 
-        // 3. Tombol Follow & Tombol Edit (BERSEBELAHAN)
         Row(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -359,7 +357,6 @@ fun ProfileScreen(
                 Text(if (isFollowing) "Following" else "Follow", fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
             }
 
-            // TOMBOL EDIT BARU
             OutlinedButton(
                 onClick = { showEditDialog = true },
                 modifier = Modifier.weight(1f).height(50.dp),
@@ -373,7 +370,6 @@ fun ProfileScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // 4. Card Informasi Kontak
         ProfileCard(title = "Informasi Kontak", containerColor = surfaceColor) {
             InfoItem(Icons.Filled.Email, "Email", uiState.email, AppColors.IconEmail, textColor)
             InfoItem(Icons.Filled.Phone, "Telepon", uiState.phone, AppColors.IconPhone, textColor)
@@ -381,11 +377,20 @@ fun ProfileScreen(
             InfoItem(Icons.Filled.Language, "Website / GitHub", uiState.website, AppColors.IconWebsite, textColor)
         }
 
-        // 5. Card Keahlian
         ProfileCard(title = "Keahlian", containerColor = surfaceColor) {
             skills.forEach { skill ->
                 InfoItem(skill.icon, skill.label, skill.value, AppColors.IconSkill, textColor)
             }
+        }
+
+        // TUGAS 8: CARD INFO DEVICE BARU (DITAMBAH BONUS BATERAI)
+        ProfileCard(title = "Informasi Perangkat", containerColor = surfaceColor) {
+            InfoItem(Icons.Filled.PhoneAndroid, "Model HP", deviceInfo.deviceModel, AppColors.IconPhone, textColor)
+            InfoItem(Icons.Filled.Settings, "Sistem Operasi", deviceInfo.osName, AppColors.IconLocation, textColor)
+            InfoItem(Icons.Filled.Info, "Versi OS", deviceInfo.osVersion, AppColors.IconSkill, textColor)
+
+            // TAMBAHAN BONUS BATERAI
+            InfoItem(Icons.Filled.BatteryChargingFull, "Persentase Baterai", batteryInfo.getBatteryLevel(), AppColors.BtnActive, textColor)
         }
 
         Spacer(modifier = Modifier.height(24.dp))

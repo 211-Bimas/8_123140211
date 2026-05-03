@@ -16,6 +16,7 @@ class MainActivity : ComponentActivity() {
         val sharedPrefs = getSharedPreferences("app_settings", Context.MODE_PRIVATE)
         val settings = SharedPreferencesSettings(sharedPrefs)
 
+        AppContext.context = applicationContext
         setContent {
             App(driverFactory = driverFactory, settings = settings) // Kirim ke App.kt
         }

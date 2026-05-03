@@ -1,5 +1,7 @@
 package org.example.project.ui
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -21,6 +23,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 
+import org.koin.compose.koinInject
+import org.example.project.NetworkMonitor
 import orgexampleproject.db.Note
 
 // --- 1. LAYAR DAFTAR CATATAN ---
@@ -33,6 +37,10 @@ fun NoteListScreen(
     onAddClick: () -> Unit,
     onFavoriteClick: (Note) -> Unit
 ) {
+    // TUGAS 8: Inject Network Monitor dan pantau status
+    val networkMonitor = koinInject<NetworkMonitor>()
+    val isConnected by networkMonitor.observeConnectivity().collectAsState(initial = true)
+
     Scaffold(
         floatingActionButton = {
             ExtendedFloatingActionButton(
@@ -45,6 +53,24 @@ fun NoteListScreen(
         }
     ) { padding ->
         Column(modifier = Modifier.padding(padding).fillMaxSize()) {
+
+            // TUGAS 8: Banner Merah kalau Offline
+            AnimatedVisibility(visible = !isConnected) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color.Red)
+                        .padding(8.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Tidak ada koneksi internet (Offline Mode)",
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            }
 
             OutlinedTextField(
                 value = searchQuery,
@@ -75,7 +101,7 @@ fun NoteListScreen(
     }
 }
 
-// --- 2. LAYAR FAVORIT (SUDAH DIPERBAIKI!) ---
+// --- 2. LAYAR FAVORIT ---
 @Composable
 fun FavoritesScreen(
     notes: List<Note>,
@@ -291,10 +317,10 @@ fun AboutScreen() {
         Spacer(Modifier.height(16.dp))
         Text("My Notes App", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
         Spacer(Modifier.height(8.dp))
-        Text("Versi 2.0 (SQL Database)", style = MaterialTheme.typography.bodyLarge)
+        Text("Versi 3.0 (Koin & Multiplatform APIs)", style = MaterialTheme.typography.bodyLarge)
         Spacer(Modifier.height(24.dp))
         Text(
-            text = "Dibuat oleh Muhammad Bimastiar (123140211) untuk Tugas Praktikum PAM Minggu 7.\nSudah Offline-first menggunakan SQLDelight dan DataStore!",
+            text = "Dibuat oleh Muhammad Bimastiar (123140211) untuk Tugas Praktikum PAM Minggu 8.\nSudah Offline-first menggunakan SQLDelight dan Platform-Specific Features!",
             textAlign = androidx.compose.ui.text.style.TextAlign.Center,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
