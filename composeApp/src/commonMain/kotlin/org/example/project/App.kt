@@ -17,7 +17,6 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import kotlinx.coroutines.launch
 
-// --- Menggunakan ObservableSettings ---
 import com.russhwolf.settings.ObservableSettings
 import org.example.project.db.DatabaseDriverFactory
 import org.example.project.db.NotesDatabase
@@ -38,39 +37,32 @@ fun App(
     driverFactory: DatabaseDriverFactory,
     settings: ObservableSettings
 ) {
-    // 1. INISIALISASI DATABASE & REPOSITORY
     val database = remember { NotesDatabase(driverFactory.createDriver()) }
     val repository = remember { NotesRepository(database) }
     val settingsManager = remember { SettingsManager(settings) }
 
     val navController = rememberNavController()
 
-    // 2. ViewModels
     val profileViewModel = remember { ProfileViewModel() }
     val profileUiState by profileViewModel.uiState.collectAsState()
 
-    // NotesViewModel sekarang menggunakan Repository (Database)
     val notesViewModel = remember { NotesViewModel(repository, settingsManager) }
     val notesUiState by notesViewModel.uiState.collectAsState()
 
-    // 3. Mengambil List Catatan dari State Database
     val notesList = when (val state = notesUiState) {
         is NotesUiState.Success -> state.notes
-        else -> emptyList() // Jika sedang Loading atau Empty, list dikosongkan sementara
+        else -> emptyList()
     }
 
     val colorScheme = if (profileUiState.isDarkMode) darkColorScheme() else lightColorScheme()
 
-    // SETUP DRAWER & COROUTINE
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
-    // SETUP CURRENT ROUTE (Untuk mengubah judul TopBar secara dinamis)
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
     MaterialTheme(colorScheme = colorScheme) {
-        // BUNGKUS DENGAN NAVIGATION DRAWER
         ModalNavigationDrawer(
             drawerState = drawerState,
             drawerContent = {
@@ -85,7 +77,6 @@ fun App(
                     HorizontalDivider()
                     Spacer(Modifier.height(8.dp))
 
-                    // Item di dalam Drawer
                     NavigationDrawerItem(
                         icon = { Icon(Icons.Default.Info, contentDescription = "Tentang") },
                         label = { Text("Tentang Aplikasi") },
@@ -95,14 +86,13 @@ fun App(
                                 popUpTo(navController.graph.startDestinationId)
                                 launchSingleTop = true
                             }
-                            scope.launch { drawerState.close() } // Tutup drawer setelah diklik
+                            scope.launch { drawerState.close() }
                         },
                         modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                     )
                 }
             }
         ) {
-            // SCAFFOLD UTAMA
             Scaffold(
                 topBar = {
                     val isTopLevel = currentRoute in listOf(
@@ -131,7 +121,6 @@ fun App(
                                     Icon(Icons.Default.Menu, contentDescription = "Buka Menu")
                                 }
                             },
-                            // <--- PERBAIKAN WARNING: Pakai topAppBarColors --->
                             colors = TopAppBarDefaults.topAppBarColors(
                                 containerColor = MaterialTheme.colorScheme.background
                             )
@@ -141,13 +130,11 @@ fun App(
                 bottomBar = { BottomNav(navController = navController) }
             ) { paddingValues ->
 
-                // NAVHOST DENGAN FITUR SEARCH, DELETE, DAN PENYESUAIAN ID
                 NavHost(
                     navController = navController,
                     startDestination = BottomNavItem.Notes.route,
                     modifier = Modifier.padding(paddingValues)
                 ) {
-                    // --- BOTTOM TABS ---
                     composable(BottomNavItem.Notes.route) {
                         val searchQuery by notesViewModel.searchQuery.collectAsState()
                         NoteListScreen(
@@ -156,13 +143,21 @@ fun App(
                             onSearchQueryChange = { query -> notesViewModel.updateSearchQuery(query) },
                             onNoteClick = { id -> navController.navigate(Screen.NoteDetail.createRoute(id.toInt())) },
                             onAddClick = { navController.navigate(Screen.AddNote.route) },
-                            // <--- INI TAMBAHAN SAMBUNGAN BUAT TOMBOL FAVORIT --->
                             onFavoriteClick = { note -> notesViewModel.toggleFavorite(note) }
                         )
                     }
+
+                    // <--- INI DIA! TAB FAVORIT UDAH DISAMBUNGIN --->
                     composable(BottomNavItem.Favorites.route) {
-                        FavoritesScreen()
+                        val favoriteNotes by notesViewModel.favoriteNotes.collectAsState()
+
+                        FavoritesScreen(
+                            notes = favoriteNotes,
+                            onNoteClick = { id -> navController.navigate(Screen.NoteDetail.createRoute(id.toInt())) },
+                            onFavoriteClick = { note -> notesViewModel.toggleFavorite(note) }
+                        )
                     }
+
                     composable(BottomNavItem.Profile.route) {
                         ProfileScreen(
                             uiState = profileUiState,
@@ -171,18 +166,15 @@ fun App(
                         )
                     }
 
-                    // --- DRAWER SCREEN ---
                     composable(Screen.About.route) {
                         AboutScreen()
                     }
 
-                    // --- DETAIL & EDIT SCREENS ---
                     composable(
                         route = Screen.NoteDetail.route,
                         arguments = listOf(navArgument("noteId") { type = NavType.IntType })
                     ) { backStackEntry ->
                         val noteId = backStackEntry.arguments?.getInt("noteId") ?: -1
-                        // Mengambil detail 1 catatan asli dari Database!
                         val note by notesViewModel.getNoteById(noteId.toLong()).collectAsState(initial = null)
 
                         NoteDetailScreen(

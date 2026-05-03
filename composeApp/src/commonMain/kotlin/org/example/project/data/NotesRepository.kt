@@ -42,4 +42,10 @@ class NotesRepository(database: NotesDatabase) {
     fun updateFavoriteStatus(id: Long, isFavorite: Long) {
         queries.updateFavorite(is_favorite = isFavorite, id = id)
     }
+
+    // Tambahkan fungsi ini buat ngambil catatan favorit
+    fun getFavoriteNotes(): Flow<List<Note>> {
+        return queries.getFavorites().asFlow().mapToList(Dispatchers.Default)
+    }
+
 }

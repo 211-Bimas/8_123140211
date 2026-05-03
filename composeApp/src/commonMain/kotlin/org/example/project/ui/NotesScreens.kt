@@ -10,7 +10,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Search
-// <--- TAMBAHAN IMPORT ICON FAVORIT --->
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.*
@@ -32,7 +31,7 @@ fun NoteListScreen(
     onSearchQueryChange: (String) -> Unit,
     onNoteClick: (Long) -> Unit,
     onAddClick: () -> Unit,
-    onFavoriteClick: (Note) -> Unit // <--- TAMBAHAN PARAMETER FAVORIT
+    onFavoriteClick: (Note) -> Unit
 ) {
     Scaffold(
         floatingActionButton = {
@@ -69,7 +68,6 @@ fun NoteListScreen(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(bottom = 80.dp)
                 ) {
-                    // <--- LEMPAR FUNGSI FAVORIT KE CARD --->
                     items(notes) { note -> NoteCard(note, onNoteClick, onFavoriteClick) }
                 }
             }
@@ -77,13 +75,32 @@ fun NoteListScreen(
     }
 }
 
-// --- 2. LAYAR FAVORIT ---
+// --- 2. LAYAR FAVORIT (SUDAH DIPERBAIKI!) ---
 @Composable
-fun FavoritesScreen() {
-    EmptyStateView(
-        icon = Icons.Default.Info,
-        message = "Tab Favorit dinonaktifkan sementara.\nTugas 7 difokuskan pada SQL Database & Search!"
-    )
+fun FavoritesScreen(
+    notes: List<Note>,
+    onNoteClick: (Long) -> Unit,
+    onFavoriteClick: (Note) -> Unit
+) {
+    if (notes.isEmpty()) {
+        EmptyStateView(
+            icon = Icons.Outlined.FavoriteBorder,
+            message = "Belum ada catatan favorit.\nKlik icon Love untuk menambahkan!"
+        )
+    } else {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(bottom = 80.dp)
+        ) {
+            items(notes) { note ->
+                NoteCard(
+                    note = note,
+                    onClick = onNoteClick,
+                    onFavoriteClick = onFavoriteClick
+                )
+            }
+        }
+    }
 }
 
 // --- KOMPONEN EMPTY STATE ---
@@ -110,7 +127,7 @@ fun EmptyStateView(icon: androidx.compose.ui.graphics.vector.ImageVector, messag
     }
 }
 
-// --- KOMPONEN KARTU CATATAN (DITAMBAH TOMBOL LOVE) ---
+// --- KOMPONEN KARTU CATATAN ---
 @Composable
 fun NoteCard(note: Note, onClick: (Long) -> Unit, onFavoriteClick: (Note) -> Unit) {
     Card(
@@ -122,7 +139,6 @@ fun NoteCard(note: Note, onClick: (Long) -> Unit, onFavoriteClick: (Note) -> Uni
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
     ) {
-        // <--- ROMBAK DESAIN BIAR ADA ICON LOVE DI KANAN --->
         Row(
             modifier = Modifier.fillMaxWidth().padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -145,7 +161,6 @@ fun NoteCard(note: Note, onClick: (Long) -> Unit, onFavoriteClick: (Note) -> Uni
                 )
             }
 
-            // TOMBOL LOVE-NYA DI SINI
             IconButton(onClick = { onFavoriteClick(note) }) {
                 Icon(
                     imageVector = if (note.is_favorite == 1L) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,

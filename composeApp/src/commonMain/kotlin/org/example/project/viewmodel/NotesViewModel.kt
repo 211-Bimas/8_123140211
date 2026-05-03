@@ -40,6 +40,14 @@ class NotesViewModel(
             initialValue = NotesUiState.Loading
         )
 
+    // Tambahkan ini buat nyimpen daftar catatan favorit
+    val favoriteNotes: StateFlow<List<Note>> = repository.getFavoriteNotes()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
+
     fun updateSearchQuery(query: String) {
         _searchQuery.value = query
     }
@@ -73,4 +81,6 @@ class NotesViewModel(
             repository.updateFavoriteStatus(note.id, newFavoriteStatus)
         }
     }
+
+
 }

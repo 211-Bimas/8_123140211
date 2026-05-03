@@ -29,3 +29,6 @@ SELECT * FROM Note WHERE title LIKE ? OR content LIKE ? ORDER BY updated_at DESC
 
 updateFavorite:
 UPDATE Note SET is_favorite = ? WHERE id = ?;
+
+getFavorites:
+SELECT * FROM Note WHERE is_favorite = 1 ORDER BY updated_at DESC;
