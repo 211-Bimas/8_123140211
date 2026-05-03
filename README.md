@@ -58,17 +58,22 @@ Proyek ini menggunakan basis **Jetpack Compose Multiplatform**. Berikut panduann
 ### 1. Tampilan Notes & Network Monitor (Banner Offline)
 *(Tampilan daftar catatan saat online dan saat koneksi internet dimatikan)*
 
-
+![img.png](img.png)
+![img_1.png](img_1.png)
 
 ### 2. Tampilan Profile & Device/Battery Info
 *(Halaman profil yang menampilkan data spesifikasi fisik perangkat dan status persentase baterai)*
 
-
+![img_2.png](img_2.png)
+![img_3.png](img_3.png)
 
 ### 3. Tampilan Tambah/Edit/Detail & Favorit
 *(Fitur CRUD persisten dengan SQLDelight dari Tugas 7 tetap berjalan normal)*
 
-
+![img_4.png](img_4.png)
+![img_5.png](img_5.png)
+![img_6.png](img_6.png)
+![img_7.png](img_7.png)
 
 ### 4. Video Demo
 *(Tautan/File Video Demo Maksimal 45 Detik yang menampilkan pengujian Jaringan dan Baterai)*
